@@ -1,5 +1,7 @@
 %% Récepteur pi/4-DQPSK/QPSK avec pré-synchronisation temporelle et fréquentielle 
-clear all, clc, close all;
+clear all; 
+clc; 
+close all;
 
 %% Paramètres 
 %Te=2*1e-7; % temps d'échantillonnage des CNA et CAN
@@ -50,7 +52,6 @@ fclose(fileID);
 rl_I=rl(1:2:end);
 rl_Q=rl(2:2:end);
 yl_Te=transpose(rl_I+1j*rl_Q);
-
 
 % % Canal
 k = 1.38e-23; % Cte Boltzmann
@@ -138,13 +139,13 @@ for k=1:Nb_paquets %pb qui vient de la synchro tps
           [~, indice] = max(Rl_Te);
           f0_8_esti = f(indice)/8;
           disp(f0_8_esti);
-          yl_Te_synch=exp(-1j*(2*pi*f0_8_esti*(0:length(yl_Te_synch)-1)*Te)).*yl_Te_synch;		  
+          yl_Te_synch=exp(-1j*(2*pi*f0_8_esti*(0:length(yl_Te_synch)-1)*Te)).*yl_Te_synch;	
+
           %% Filtre adapté
           rl_Te = conv(yl_Te_synch,ga);  % convolution par le filtre adpaté         
-		  [ K1, K2 ] = piLoopConstants(calcTedKp('GTED', 0.8), -1, 1, 0, 1); %K0=-1
-          [ rl_Te_post ] = PLL_Loop('GTED', 1, rl_Te, K1, K2);
-           
-		  rl_Ts1=rl_Te_post(length(ga)+1:Fse:length(ga)+((Nb+Nb_paquets*length(Octet_verif))/2/Nb_paquets+1)*Fse+1); % sous echantillonnage au rythme Fse (correspond à un échantillonnage de r_l(t) au rythme Ts)
+		  [ K1, K2 ] = piLoopConstants(calcTedKp('GTED', 0.8), 1, 1, 1/800, 1); 
+          [ rl_Te_post ] = PLL_Loop('GTED', 1, rl_Te, K1, K2);          
+		  rl_Ts1=rl_Te_post(length(ga)+1:Fse:length(ga)+((Nb+Nb_paquets*length(Octet_verif))/2/Nb_paquets+1)*Fse+1); % sous echantillonnage au rythme Fse (correspond à un échantillonnage de r_l(t) au rythme Ts)         
           rl_Ts=transpose(rl_Ts1); % we transpose to have the same dimensions 
           % Pré-synchronisation fréquentielle tant que 2pi*Nb*f_erreur<pi/4
           Phase_correction =(angle(ssd_Ts_1)-angle(rl_Ts(1)));
