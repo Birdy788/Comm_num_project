@@ -12,8 +12,8 @@ function [ xI ] = PLL_Loop(TED, L, mfOut, K1, K2)
 % The interpolator used in this code is the Linear interpolator
 
 % Input Arguments:
-% TED     -> TED scheme ('MLTED', 'ELTED', 'ZCTED', 'GTED', or 'MMTED').
-% L       -> Oversampling factor. ( It should always be equal to 1)
+% TED     -> TED scheme : GTED.
+% L       -> Oversampling factor. ( 1)
 % mfOut   -> MF(Matched Filter) output sequence sampled at L samples/symbol.
 % K1      -> PI controller's proportional gain.
 % K2      -> PI controller's integrator gain.
@@ -52,6 +52,7 @@ vi     = 0; % PI filter integrator
 n_start = 1;
 last_xI = inVec(1);
 n_end = nSamples;
+
 
 for n = n_start:n_end
     if strobe == 1
@@ -123,7 +124,7 @@ end
 
 %% Interpolation
 function [xI] = interpolate( x, m_k, mu)
-% [xI] = interpolate(method, x, m_k, mu, b_mtx, poly_h) returns the
+% [xI] = interpolate(method, x, m_k, mu) returns the
 % interpolant xI obtained from the vector of samples x.
 %
 % Args:
@@ -145,7 +146,9 @@ function [xI] = interpolate( x, m_k, mu)
         mu = mu - 1;
     end
     assert(mu >= 0 && mu < 1); 
-    xI = mu * x(m_k + 1) + (1 - mu) * x(m_k); % Linear Interpolator (See Eq. 8.61)
+    c0=mu;
+    c1=1-mu;
+    xI = c0 * x(m_k + 1) + c1 * x(m_k); % Linear Interpolator (See Eq. 8.61)
 end
 
 end
